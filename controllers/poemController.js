@@ -1,10 +1,10 @@
 const Poem = require('../models/poemModel');
 
-
+// Create Poem
 const createPoem = async (req, res) => {
     try {
-        const { title, content,dedicate, author } = req.body;
-        const poem = await Poem.create({ title,content,dedicate, author });
+        const { title, content, author, dedicate } = req.body;
+        const poem = await Poem.create({ title, content, author, dedicate });
         res.status(201).json({
             success: true,
             message: 'Poem created successfully',
@@ -18,7 +18,7 @@ const createPoem = async (req, res) => {
     }
 };
 
-
+// Get All Poems
 const getPoems = async (req, res) => {
     try {
         const poems = await Poem.find();
@@ -34,17 +34,18 @@ const getPoems = async (req, res) => {
     }
 };
 
-
-const updatePoem = async (req, res) => {
+// Get Single Poem
+const getSinglePoem = async (req, res) => {
     try {
-        const poem = await Poem.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        );
+        const poem = await Poem.findById(req.params.id);
+        if (!poem) {
+            return res.status(404).json({
+                success: false,
+                message: 'Poem not found'
+            });
+        }
         res.status(200).json({
             success: true,
-            message: 'poem updated successfully',
             data: poem
         });
     } catch (err) {
@@ -55,9 +56,43 @@ const updatePoem = async (req, res) => {
     }
 };
 
+// Update Poem
+const updatePoem = async (req, res) => {
+    try {
+        const poem = await Poem.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+        if (!poem) {
+            return res.status(404).json({
+                success: false,
+                message: 'Poem not found'
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: 'Poem updated successfully',
+            data: poem
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+};
+
+// Delete Poem
 const deletePoem = async (req, res) => {
     try {
-        await Poem.findByIdAndDelete(req.params.id);
+        const poem = await Poem.findByIdAndDelete(req.params.id);
+        if (!poem) {
+            return res.status(404).json({
+                success: false,
+                message: 'Poem not found'
+            });
+        }
         res.status(200).json({
             success: true,
             message: 'Poem deleted successfully'
@@ -70,4 +105,4 @@ const deletePoem = async (req, res) => {
     }
 };
 
-module.exports = { createPoem, getPoems, updatePoem, deletePoem };
+module.exports = { createPoem, getPoems, getSinglePoem, updatePoem, deletePoem };

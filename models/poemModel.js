@@ -6,12 +6,7 @@ const poemSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    poem: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    dedicate: {
+    content: {
         type: String,
         required: true,
         trim: true
@@ -20,8 +15,11 @@ const poemSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    dedicate: {
+        type: String,
+        trim: true
     }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Poem', poemSchema);
-
