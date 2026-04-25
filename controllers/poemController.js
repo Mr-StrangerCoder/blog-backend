@@ -11,6 +11,7 @@ const createPoem = async (req, res) => {
             data: poem
         });
     } catch (err) {
+        console.log(err, "create1111111111111111111111111111")
         res.status(500).json({
             success: false,
             message: err.message
