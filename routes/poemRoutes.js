@@ -3,6 +3,7 @@ const router = express.Router();
 const {
     createPoem,
     getPoems,
+    getMyPoems,
     getSinglePoem,
     updatePoem,
     deletePoem,
@@ -14,7 +15,8 @@ const { protect } = require('../middleware/authMiddleware');
 router.get('/poems', getPoems);
 router.get('/poem/:id', getSinglePoem);
 
-// Protected routes - must be logged in
+// Protected routes
+router.get('/my-poems', protect, getMyPoems);
 router.post('/create-poem', protect, createPoem);
 router.put('/update-poem/:id', protect, updatePoem);
 router.delete('/delete-poem/:id', protect, deletePoem);

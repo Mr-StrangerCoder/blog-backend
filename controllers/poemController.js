@@ -9,7 +9,7 @@ const createPoem = async (req, res) => {
             content,
             author,
             dedicate,
-            user: req.user.id // 👈 logged in user's id
+            user: req.user.id
         });
         res.status(201).json({
             success: true,
@@ -28,8 +28,26 @@ const createPoem = async (req, res) => {
 const getPoems = async (req, res) => {
     try {
         const poems = await Poem.find()
-            .populate('user', 'name email') // 👈 get user details
-            .sort({ createdAt: -1 }); // 👈 newest first
+            .populate('user', 'name email')
+            .sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            data: poems
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+};
+
+// Get My Poems
+const getMyPoems = async (req, res) => {
+    try {
+        const poems = await Poem.find({ user: req.user.id })
+            .populate('user', 'name email')
+            .sort({ createdAt: -1 });
         res.status(200).json({
             success: true,
             data: poems
@@ -75,15 +93,12 @@ const updatePoem = async (req, res) => {
                 message: 'Poem not found'
             });
         }
-
-        // Check if poem belongs to logged in user
         if (poem.user.toString() !== req.user.id) {
             return res.status(403).json({
                 success: false,
                 message: 'Not authorized to update this poem'
             });
         }
-
         const updatedPoem = await Poem.findByIdAndUpdate(
             req.params.id,
             req.body,
@@ -112,15 +127,12 @@ const deletePoem = async (req, res) => {
                 message: 'Poem not found'
             });
         }
-
-        // Check if poem belongs to logged in user or admin
         if (poem.user.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: 'Not authorized to delete this poem'
             });
         }
-
         await Poem.findByIdAndDelete(req.params.id);
         res.status(200).json({
             success: true,
@@ -144,29 +156,22 @@ const likePoem = async (req, res) => {
                 message: 'Poem not found'
             });
         }
-
         const alreadyLiked = poem.likedBy.includes(req.user.id);
-
         if (alreadyLiked) {
-            // Unlike
             poem.likedBy = poem.likedBy.filter(
                 id => id.toString() !== req.user.id
             );
             poem.likes = poem.likes - 1;
         } else {
-            // Like
             poem.likedBy.push(req.user.id);
             poem.likes = poem.likes + 1;
         }
-
         await poem.save();
-
         res.status(200).json({
             success: true,
             message: alreadyLiked ? 'Poem unliked' : 'Poem liked',
             likes: poem.likes
         });
-
     } catch (err) {
         res.status(500).json({
             success: false,
@@ -178,6 +183,7 @@ const likePoem = async (req, res) => {
 module.exports = {
     createPoem,
     getPoems,
+    getMyPoems,
     getSinglePoem,
     updatePoem,
     deletePoem,
